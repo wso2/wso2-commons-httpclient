@@ -22,7 +22,7 @@
 
     <groupId>org.wso2.commons-httpclient</groupId>
     <artifactId>commons-httpclient-parent</artifactId>
-    <version>3.1.0-wso2v3</version>
+    <version>3.1.0-wso2v4-SNAPSHOT</version>
     <name>Commons HTTP Client - WSO2 Parent</name>
     <packaging>pom</packaging>
 
