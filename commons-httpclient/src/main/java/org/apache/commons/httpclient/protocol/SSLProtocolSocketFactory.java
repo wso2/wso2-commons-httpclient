@@ -152,7 +152,9 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
         }
         int timeout = params.getConnectionTimeout();
         if (timeout == 0) {
-            Socket sslSocket =  createSocket(host, port, localAddress, localPort);
+            Socket sslSocket = SSLSocketFactory.getDefault().createSocket(
+                host, port, localAddress, localPort);
+            sslSocket.setSoTimeout(params.getSoTimeout());
             verifyHostName(host, (SSLSocket) sslSocket);
             return sslSocket;
         } else {
@@ -163,6 +165,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
             	sslSocket = ControllerThreadSocketFactory.createSocket(
                     this, host, port, localAddress, localPort, timeout);
             }
+            sslSocket.setSoTimeout(params.getSoTimeout());
             verifyHostName(host, (SSLSocket) sslSocket);
             return sslSocket;
         }
