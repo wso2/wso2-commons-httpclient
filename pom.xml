@@ -68,6 +68,8 @@
         <commons-codec.version>1.2</commons-codec.version>
         <commons-logging.version>1.0.4</commons-logging.version>
         <junit.version>3.8.1</junit.version>
+
+        <project.scm.id>scm-server</project.scm.id>
     </properties>
 
 
