@@ -53,6 +53,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.apache.commons.httpclient.HttpConstants;
 import org.apache.commons.httpclient.conn.util.InetAddressUtils;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.logging.Log;
@@ -285,11 +286,11 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
         
 		String[] cns = getCNs(cert);
 		String[] subjectAlts = getDNSSubjectAlts(cert);
-        if ("Strict".equals(hostnameVerfier)) {
+        if (HttpConstants.STRICT.equals(hostnameVerfier)) {
             verifyHostName(host, cns, subjectAlts, true);
-        } else if ("AllowAll".equals(hostnameVerfier)) {
+        } else if (HttpConstants.ALLOW_ALL.equals(hostnameVerfier)) {
             return;
-        } else if ("DefaultAndLocalhost".equals(hostnameVerfier)) {
+        } else if (HttpConstants.DEFAULT_AND_LOCALHOST.equals(hostnameVerfier)) {
             if (isLocalhost(host)) {
                 return;
             }

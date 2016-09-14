@@ -55,6 +55,12 @@ public class HttpConstants {
     /** Log object for this class. */
     private static final Log LOG = LogFactory.getLog(HttpConstants.class);
 
+    public static final String STRICT = "Strict";
+
+    public static final String ALLOW_ALL = "AllowAll";
+
+    public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
+
     /**
      * Converts the specified string to a byte array of HTTP element characters.
      * This method is to be used when encoding content of HTTP elements (such as
