@@ -102,11 +102,11 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
      */
     public SSLProtocolSocketFactory() {
         super();
+        String hostNameVerifier = System.getProperty(HttpConstants.HOST_NAME_VERIFIER);
+        if (hostNameVerifier != null) {
+            hostnameVerfier = hostNameVerifier;
+        }
     }
-
-	public SSLProtocolSocketFactory(String hostNameVerifier) {
-		this.hostnameVerfier = hostNameVerifier;
-	}
 
     /**
      * @see SecureProtocolSocketFactory#createSocket(java.lang.String,int,java.net.InetAddress,int)

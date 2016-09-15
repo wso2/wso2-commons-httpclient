@@ -61,6 +61,8 @@ public class HttpConstants {
 
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
 
+    public static final String HOST_NAME_VERIFIER = "org.wso2.HostNameVerifier";
+
     /**
      * Converts the specified string to a byte array of HTTP element characters.
      * This method is to be used when encoding content of HTTP elements (such as
