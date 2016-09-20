@@ -38,14 +38,15 @@ import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Pattern;
 
+import javax.naming.InvalidNameException;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -282,19 +283,19 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 		// to establish the socket to the hostname in the certificate.
 		// Don't trim the CN, though.
 
-		String[] cns = getCNs(cert);
+		String cn = getCN(cert);
 		String[] subjectAlts = getDNSSubjectAlts(cert);
 		if (HttpConstants.STRICT.equals(hostNameVerifier)) {
-			verifyHostName(host, cns, subjectAlts, true);
+			verifyHostName(host, cn, subjectAlts, true);
 		} else if (HttpConstants.ALLOW_ALL.equals(hostNameVerifier)) {
 			return;
 		} else if (HttpConstants.DEFAULT_AND_LOCALHOST.equals(hostNameVerifier)) {
 			if (isLocalhost(host)) {
 				return;
 			}
-			verifyHostName(host, cns, subjectAlts, false);
+			verifyHostName(host, cn, subjectAlts, false);
 		} else {
-			verifyHostName(host, cns, subjectAlts, false);
+			verifyHostName(host, cn, subjectAlts, false);
 		}
 	}
 
@@ -348,20 +349,17 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 	/**
 	 * Verifies
 	 * @param host
-	 * @param cns
+	 * @param cn
 	 * @param subjectAlts
 	 * @throws SSLException
 	 */
 
-	private static void verifyHostName(final String host, String[] cns, String[] subjectAlts,
+	private static void verifyHostName(final String host, String cn, String[] subjectAlts,
 	                                   boolean strictWithSubDomains) throws SSLException {
-		// Build the list of names we're going to check.  Our DEFAULT and
-		// STRICT implementations of the HostnameVerifier only use the
-		// first CN provided.  All other CNs are ignored.
-		// (Firefox, wget, curl, Sun Java 1.4, 5, 6 all work this way).
+
 		final LinkedList<String> names = new LinkedList<String>();
-		if (cns != null && cns.length > 0 && cns[0] != null) {
-			names.add(cns[0]);
+		if (cn != null) {
+			names.add(cn);
 		}
 		if (subjectAlts != null) {
 			for (final String subjectAlt : subjectAlts) {
@@ -386,11 +384,11 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 		boolean match = false;
 		for (final Iterator<String> it = names.iterator(); it.hasNext(); ) {
 			// Don't trim the CN, though!
-			String cn = it.next();
-			cn = cn.toLowerCase(Locale.US);
+			String commonName = it.next();
+			commonName = commonName.toLowerCase(Locale.US);
 			// Store CN in StringBuilder in case we need to report an error.
 			buf.append(" <");
-			buf.append(cn);
+			buf.append(commonName);
 			buf.append('>');
 			if (it.hasNext()) {
 				buf.append(" OR");
@@ -399,9 +397,9 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 			// The CN better have at least two dots if it wants wildcard
 			// action.  It also can't be [*.co.uk] or [*.co.jp] or
 			// [*.org.uk], etc...
-			final String parts[] = cn.split("\\.");
+			final String parts[] = commonName.split("\\.");
 			final boolean doWildcard = parts.length >= 3 && parts[0].endsWith("*") &&
-			                           validCountryWildcard(cn) && !isIPAddress(host);
+			                           validCountryWildcard(commonName) && !isIPAddress(host);
 
 			if (doWildcard) {
 				final String firstpart = parts[0];
@@ -409,20 +407,20 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 					final String prefix =
 							firstpart.substring(0, firstpart.length() - 1); // e.g. server
 					final String suffix =
-							cn.substring(firstpart.length()); // skip wildcard part from cn
+							commonName.substring(firstpart.length()); // skip wildcard part from cn
 					final String hostSuffix =
 							hostName.substring(prefix.length()); // skip wildcard part from host
 					match = hostName.startsWith(prefix) && hostSuffix.endsWith(suffix);
 				} else {
-					match = hostName.endsWith(cn.substring(1));
+					match = hostName.endsWith(commonName.substring(1));
 				}
 				if (match && strictWithSubDomains) {
 					// If we're in strict mode, then [*.foo.com] is not
 					// allowed to match [a.b.foo.com]
-					match = countDots(hostName) == countDots(cn);
+					match = countDots(hostName) == countDots(commonName);
 				}
 			} else {
-				match = hostName.equals(normaliseIPv6Address(cn));
+				match = hostName.equals(normaliseIPv6Address(commonName));
 			}
 			if (match) {
 				break;
@@ -488,51 +486,45 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 		return dots;
 	}
 
-	private static String[] getCNs(final X509Certificate cert) {
-		final LinkedList<String> cnList = new LinkedList<String>();
-	    /*
-          Sebastian Hauer's original StrictSSLProtocolSocketFactory used
-          getName() and had the following comment:
-
-                Parses a X.500 distinguished name for the value of the
-                "Common Name" field.  This is done a bit sloppy right
-                 now and should probably be done a bit more according to
-                <code>RFC 2253</code>.
-
-           I've noticed that toString() seems to do a better job than
-           getName() on these X500Principal objects, so I'm hoping that
-           addresses Sebastian's concern.
-
-           For example, getName() gives me this:
-           1.2.840.113549.1.9.1=#16166a756c6975736461766965734063756362632e636f6d
-
-           whereas toString() gives me this:
-           EMAILADDRESS=juliusdavies@cucbc.com
-
-           Looks like toString() even works with non-ascii domain names!
-           I tested it with "&#x82b1;&#x5b50;.co.jp" and it worked fine.
-        */
-
+	private static String getCN(final X509Certificate cert) {
 		final String subjectPrincipal = cert.getSubjectX500Principal().toString();
-		final StringTokenizer st = new StringTokenizer(subjectPrincipal, ",+");
-		while (st.hasMoreTokens()) {
-			final String tok = st.nextToken().trim();
-			if (tok.length() > 3) {
-				if (tok.substring(0, 3).equalsIgnoreCase("CN=")) {
-					cnList.add(tok.substring(3));
-				}
-			}
-		}
-		if (!cnList.isEmpty()) {
-			final String[] cns = new String[cnList.size()];
-			cnList.toArray(cns);
-			return cns;
-		} else {
+		try {
+			return extractCN(subjectPrincipal);
+		} catch (SSLException ex) {
 			return null;
 		}
 	}
 
-    /**
+	private static String extractCN(final String subjectPrincipal) throws SSLException {
+		if (subjectPrincipal == null) {
+			return null;
+		}
+		try {
+			final LdapName subjectDN = new LdapName(subjectPrincipal);
+			final List<Rdn> rdns = subjectDN.getRdns();
+			for (int i = rdns.size() - 1; i >= 0; i--) {
+				final Rdn rds = rdns.get(i);
+				final Attributes attributes = rds.toAttributes();
+				final Attribute cn = attributes.get("cn");
+				if (cn != null) {
+					try {
+						final Object value = cn.get();
+						if (value != null) {
+							return value.toString();
+						}
+					} catch (NoSuchElementException ignore) {
+					} catch (NamingException ignore) {
+					}
+				}
+			}
+		} catch (InvalidNameException e) {
+			throw new SSLException(subjectPrincipal + " is not a valid X500 distinguished name");
+		}
+		return null;
+	}
+
+
+	/**
      * All instances of SSLProtocolSocketFactory are the same.
      */
     public boolean equals(Object obj) {
