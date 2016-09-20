@@ -38,7 +38,13 @@ import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 import javax.naming.InvalidNameException;
