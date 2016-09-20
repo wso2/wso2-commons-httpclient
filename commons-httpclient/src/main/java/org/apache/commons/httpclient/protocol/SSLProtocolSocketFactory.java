@@ -121,7 +121,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
         int port,
         InetAddress clientHost,
         int clientPort)
-        throws IOException, UnknownHostException {
+        throws IOException {
         Socket sslSocket =  SSLSocketFactory.getDefault().createSocket(
             host,
             port,
@@ -163,7 +163,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
         final InetAddress localAddress,
         final int localPort,
         final HttpConnectionParams params
-    ) throws IOException, UnknownHostException, ConnectTimeoutException {
+    ) throws IOException {
         if (params == null) {
             throw new IllegalArgumentException("Parameters may not be null");
         }
@@ -192,7 +192,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
      * @see SecureProtocolSocketFactory#createSocket(java.lang.String,int)
      */
     public Socket createSocket(String host, int port)
-        throws IOException, UnknownHostException {
+        throws IOException {
         Socket sslSocket = SSLSocketFactory.getDefault().createSocket(
             host,
             port
@@ -209,7 +209,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
         String host,
         int port,
         boolean autoClose)
-        throws IOException, UnknownHostException {
+        throws IOException {
         Socket sslSocket = ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(
             socket,
             host,
@@ -353,7 +353,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 	        
 	}
 	/**
-	 * Verifies
+	 * Verifies host name.
 	 * @param host
 	 * @param cn
 	 * @param subjectAlts
@@ -404,16 +404,16 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 			// action.  It also can't be [*.co.uk] or [*.co.jp] or
 			// [*.org.uk], etc...
 			final String parts[] = commonName.split("\\.");
-			final boolean doWildcard = parts.length >= 3 && parts[0].endsWith("*") &&
+			final boolean doWildCard = parts.length >= 3 && parts[0].endsWith("*") &&
 			                           validCountryWildcard(commonName) && !isIPAddress(host);
 
-			if (doWildcard) {
-				final String firstpart = parts[0];
-				if (firstpart.length() > 1) { // e.g. server*
+			if (doWildCard) {
+				final String firstPart = parts[0];
+				if (firstPart.length() > 1) { // e.g. server*
 					final String prefix =
-							firstpart.substring(0, firstpart.length() - 1); // e.g. server
+							firstPart.substring(0, firstPart.length() - 1); // e.g. server
 					final String suffix =
-							commonName.substring(firstpart.length()); // skip wildcard part from cn
+							commonName.substring(firstPart.length()); // skip wildcard part from cn
 					final String hostSuffix =
 							hostName.substring(prefix.length()); // skip wildcard part from host
 					match = hostName.startsWith(prefix) && hostSuffix.endsWith(suffix);

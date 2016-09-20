@@ -61,7 +61,7 @@ public class HttpConstants {
 
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
 
-    public static final String HOST_NAME_VERIFIER = "org.wso2.HostNameVerifier";
+    public static final String HOST_NAME_VERIFIER = "https.protocol.host-name-verifier";
 
     /**
      * Converts the specified string to a byte array of HTTP element characters.
