@@ -38,15 +38,14 @@ import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
-import javax.naming.InvalidNameException;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
@@ -73,23 +72,22 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
      * The factory singleton.
      */
     private static final SSLProtocolSocketFactory factory = new SSLProtocolSocketFactory();
-    private static String hostnameVerfier;
+    private static String hostNameVerifier;
     private static final Log LOG = LogFactory.getLog(SSLProtocolSocketFactory.class);
-    
-    // This is a a sorted list, if you insert new elements do it orderdered.
-    private final static String[] BAD_COUNTRY_2LDS =
-        {"ac", "co", "com", "ed", "edu", "go", "gouv", "gov", "info",
-            "lg", "ne", "net", "or", "org"};
 
-    private final static String[] LOCALHOSTS = {"::1", "127.0.0.1",
-            "localhost",
-            "localhost.localdomain"};
+	// This is a a sorted list, if you insert new elements do it ordered.
+	private final static String[] BAD_COUNTRY_2LDS =
+			{ "ac", "co", "com", "ed", "edu", "go", "gouv", "gov", "info", "lg", "ne", "net", "or",
+			  "org" };
 
-    static {
-        Arrays.sort(LOCALHOSTS);
-    }
-    
-    /**
+	private final static String[] LOCALHOSTS =
+			{ "::1", "127.0.0.1", "localhost", "localhost.localdomain" };
+
+	static {
+		Arrays.sort(LOCALHOSTS);
+	}
+
+	/**
      * Gets an singleton instance of the SSLProtocolSocketFactory.
      * @return a SSLProtocolSocketFactory
      */
@@ -104,7 +102,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
         super();
         String hostNameVerifier = System.getProperty(HttpConstants.HOST_NAME_VERIFIER);
         if (hostNameVerifier != null) {
-            hostnameVerfier = hostNameVerifier;
+            this.hostNameVerifier = hostNameVerifier;
         }
     }
 
@@ -123,7 +121,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
             clientHost,
             clientPort
         );
-        verifyHostName(host, (SSLSocket) sslSocket, hostnameVerfier);
+        verifyHostName(host, (SSLSocket) sslSocket, hostNameVerifier);
         return sslSocket;
     }
 
@@ -167,7 +165,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
             Socket sslSocket = SSLSocketFactory.getDefault().createSocket(
                 host, port, localAddress, localPort);
             sslSocket.setSoTimeout(params.getSoTimeout());
-            verifyHostName(host, (SSLSocket) sslSocket, hostnameVerfier);
+            verifyHostName(host, (SSLSocket) sslSocket, hostNameVerifier);
             return sslSocket;
         } else {
             // To be eventually deprecated when migrated to Java 1.4 or above
@@ -178,7 +176,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
                     this, host, port, localAddress, localPort, timeout);
             }
             sslSocket.setSoTimeout(params.getSoTimeout());
-            verifyHostName(host, (SSLSocket) sslSocket, hostnameVerfier);
+            verifyHostName(host, (SSLSocket) sslSocket, hostNameVerifier);
             return sslSocket;
         }
     }
@@ -192,7 +190,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
             host,
             port
         );
-        verifyHostName(host, (SSLSocket) sslSocket, hostnameVerfier);
+        verifyHostName(host, (SSLSocket) sslSocket, hostNameVerifier);
         return sslSocket;
     }
 
@@ -211,7 +209,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
             port,
             autoClose
         );
-        verifyHostName(host, (SSLSocket) sslSocket, hostnameVerfier);
+        verifyHostName(host, (SSLSocket) sslSocket, hostNameVerifier);
         return sslSocket;
     }
     
@@ -226,7 +224,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
      * @throws IOException
      */
     
-	private static void verifyHostName(String host, SSLSocket ssl, String hostnameVerfier)
+	private static void verifyHostName(String host, SSLSocket ssl, String hostNameVerifier)
 			throws IOException {
 		if (host == null) {
 			throw new IllegalArgumentException("host to verify was null");
@@ -269,7 +267,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 		}
 
 		Certificate[] certs = session.getPeerCertificates();
-		verifyHostName(host.trim().toLowerCase(Locale.US),  (X509Certificate) certs[0], hostnameVerfier);
+		verifyHostName(host.trim().toLowerCase(Locale.US),  (X509Certificate) certs[0], hostNameVerifier);
 	}
 	/**
 	 * Extract the names from the certificate and tests host matches one of them
@@ -278,39 +276,39 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 	 * @throws SSLException
 	 */
 
-	private static void verifyHostName(final String host, X509Certificate cert, String hostnameVerfier)
-			throws SSLException {
-        // I'm okay with being case-insensitive when comparing the host we used
-        // to establish the socket to the hostname in the certificate.
-        // Don't trim the CN, though.
-        
+	private static void verifyHostName(final String host, X509Certificate cert,
+	                                   String hostNameVerifier) throws SSLException {
+		// I'm okay with being case-insensitive when comparing the host we used
+		// to establish the socket to the hostname in the certificate.
+		// Don't trim the CN, though.
+
 		String[] cns = getCNs(cert);
 		String[] subjectAlts = getDNSSubjectAlts(cert);
-        if (HttpConstants.STRICT.equals(hostnameVerfier)) {
-            verifyHostName(host, cns, subjectAlts, true);
-        } else if (HttpConstants.ALLOW_ALL.equals(hostnameVerfier)) {
-            return;
-        } else if (HttpConstants.DEFAULT_AND_LOCALHOST.equals(hostnameVerfier)) {
-            if (isLocalhost(host)) {
-                return;
-            }
-            verifyHostName(host, cns, subjectAlts, false);
-        } else {
-            verifyHostName(host, cns, subjectAlts, false);
-        }
+		if (HttpConstants.STRICT.equals(hostNameVerifier)) {
+			verifyHostName(host, cns, subjectAlts, true);
+		} else if (HttpConstants.ALLOW_ALL.equals(hostNameVerifier)) {
+			return;
+		} else if (HttpConstants.DEFAULT_AND_LOCALHOST.equals(hostNameVerifier)) {
+			if (isLocalhost(host)) {
+				return;
+			}
+			verifyHostName(host, cns, subjectAlts, false);
+		} else {
+			verifyHostName(host, cns, subjectAlts, false);
+		}
 	}
 
-    static boolean isLocalhost(String host) {
-        host = host != null ? host.trim().toLowerCase() : "";
-        if (host.startsWith("::1")) {
-            int x = host.lastIndexOf('%');
-            if (x >= 0) {
-                host = host.substring(0, x);
-            }
-        }
-        int x = Arrays.binarySearch(LOCALHOSTS, host);
-        return x >= 0;
-    }
+	static boolean isLocalhost(String host) {
+		host = host != null ? host.trim().toLowerCase() : "";
+		if (host.startsWith("::1")) {
+			int x = host.lastIndexOf('%');
+			if (x >= 0) {
+				host = host.substring(0, x);
+			}
+		}
+		int x = Arrays.binarySearch(LOCALHOSTS, host);
+		return x >= 0;
+	}
 
 	/**
 	 * Extract all alternative names from a certificate.
@@ -355,126 +353,111 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 	 * @throws SSLException
 	 */
 
-	private static void verifyHostName(final String host, String[] cns, String[] subjectAlts, boolean strictWithSubDomains)throws SSLException{
-        // Build the list of names we're going to check.  Our DEFAULT and
-        // STRICT implementations of the HostnameVerifier only use the
-        // first CN provided.  All other CNs are ignored.
-        // (Firefox, wget, curl, Sun Java 1.4, 5, 6 all work this way).
-        final LinkedList<String> names = new LinkedList<String>();
-        if(cns != null && cns.length > 0 && cns[0] != null) {
-            names.add(cns[0]);
-        }
-        if(subjectAlts != null) {
-            for (final String subjectAlt : subjectAlts) {
-                if (subjectAlt != null) {
-                    names.add(subjectAlt);
-                }
-            }
-        }
+	private static void verifyHostName(final String host, String[] cns, String[] subjectAlts,
+	                                   boolean strictWithSubDomains) throws SSLException {
+		// Build the list of names we're going to check.  Our DEFAULT and
+		// STRICT implementations of the HostnameVerifier only use the
+		// first CN provided.  All other CNs are ignored.
+		// (Firefox, wget, curl, Sun Java 1.4, 5, 6 all work this way).
+		final LinkedList<String> names = new LinkedList<String>();
+		if (cns != null && cns.length > 0 && cns[0] != null) {
+			names.add(cns[0]);
+		}
+		if (subjectAlts != null) {
+			for (final String subjectAlt : subjectAlts) {
+				if (subjectAlt != null) {
+					names.add(subjectAlt);
+				}
+			}
+		}
 
-        if(names.isEmpty()) {
-            final String msg = "Certificate for <" + host + "> doesn't contain CN or DNS subjectAlt";
-            throw new SSLException(msg);
-        }
+		if (names.isEmpty()) {
+			final String msg =
+					"Certificate for <" + host + "> doesn't contain CN or DNS subjectAlt";
+			throw new SSLException(msg);
+		}
 
-        // StringBuilder for building the error message.
-        final StringBuilder buf = new StringBuilder();
+		// StringBuilder for building the error message.
+		final StringBuilder buf = new StringBuilder();
 
-        // We're can be case-insensitive when comparing the host we used to
-        // establish the socket to the hostname in the certificate.
-        final String hostName = normaliseIPv6Address(host.trim().toLowerCase(Locale.US));
-        boolean match = false;
-        for(final Iterator<String> it = names.iterator(); it.hasNext();) {
-            // Don't trim the CN, though!
-            String cn = it.next();
-            cn = cn.toLowerCase(Locale.US);
-            // Store CN in StringBuilder in case we need to report an error.
-            buf.append(" <");
-            buf.append(cn);
-            buf.append('>');
-            if(it.hasNext()) {
-                buf.append(" OR");
-            }
+		// We're can be case-insensitive when comparing the host we used to
+		// establish the socket to the hostname in the certificate.
+		final String hostName = normaliseIPv6Address(host.trim().toLowerCase(Locale.US));
+		boolean match = false;
+		for (final Iterator<String> it = names.iterator(); it.hasNext(); ) {
+			// Don't trim the CN, though!
+			String cn = it.next();
+			cn = cn.toLowerCase(Locale.US);
+			// Store CN in StringBuilder in case we need to report an error.
+			buf.append(" <");
+			buf.append(cn);
+			buf.append('>');
+			if (it.hasNext()) {
+				buf.append(" OR");
+			}
 
-            // The CN better have at least two dots if it wants wildcard
-            // action.  It also can't be [*.co.uk] or [*.co.jp] or
-            // [*.org.uk], etc...
-            final String parts[] = cn.split("\\.");
-            final boolean doWildcard =
-                    parts.length >= 3 && parts[0].endsWith("*") &&
-                            validCountryWildcard(cn) && !isIPAddress(host);
+			// The CN better have at least two dots if it wants wildcard
+			// action.  It also can't be [*.co.uk] or [*.co.jp] or
+			// [*.org.uk], etc...
+			final String parts[] = cn.split("\\.");
+			final boolean doWildcard = parts.length >= 3 && parts[0].endsWith("*") &&
+			                           validCountryWildcard(cn) && !isIPAddress(host);
 
-            if(doWildcard) {
-                final String firstpart = parts[0];
-                if (firstpart.length() > 1) { // e.g. server*
-                    final String prefix = firstpart.substring(0, firstpart.length() - 1); // e.g. server
-                    final String suffix = cn.substring(firstpart.length()); // skip wildcard part from cn
-                    final String hostSuffix = hostName.substring(prefix.length()); // skip wildcard part from host
-                    match = hostName.startsWith(prefix) && hostSuffix.endsWith(suffix);
-                } else {
-                    match = hostName.endsWith(cn.substring(1));
-                }
-                if(match && strictWithSubDomains) {
-                    // If we're in strict mode, then [*.foo.com] is not
-                    // allowed to match [a.b.foo.com]
-                    match = countDots(hostName) == countDots(cn);
-                }
-            } else {
-                match = hostName.equals(normaliseIPv6Address(cn));
-            }
-            if(match) {
-                break;
-            }
-        }
-        if(!match) {
-            throw new SSLException("hostname in certificate didn't match: <" + host + "> !=" + buf);
-        }
-		
+			if (doWildcard) {
+				final String firstpart = parts[0];
+				if (firstpart.length() > 1) { // e.g. server*
+					final String prefix =
+							firstpart.substring(0, firstpart.length() - 1); // e.g. server
+					final String suffix =
+							cn.substring(firstpart.length()); // skip wildcard part from cn
+					final String hostSuffix =
+							hostName.substring(prefix.length()); // skip wildcard part from host
+					match = hostName.startsWith(prefix) && hostSuffix.endsWith(suffix);
+				} else {
+					match = hostName.endsWith(cn.substring(1));
+				}
+				if (match && strictWithSubDomains) {
+					// If we're in strict mode, then [*.foo.com] is not
+					// allowed to match [a.b.foo.com]
+					match = countDots(hostName) == countDots(cn);
+				}
+			} else {
+				match = hostName.equals(normaliseIPv6Address(cn));
+			}
+			if (match) {
+				break;
+			}
+		}
+		if (!match) {
+			throw new SSLException("hostname in certificate didn't match: <" + host + "> !=" + buf);
+		}
+
 	}
 
-    static boolean validCountryWildcard(final String cn) {
-        final String parts[] = cn.split("\\.");
-        if (parts.length != 3 || parts[2].length() != 2) {
-            return true; // it's not an attempt to wildcard a 2TLD within a country code
-        }
-        return Arrays.binarySearch(BAD_COUNTRY_2LDS, parts[1]) < 0;
-    }
-
-    /*
- * Check if hostname is IPv6, and if so, convert to standard format.
- */
-    private static String normaliseIPv6Address(final String hostname) {
-        if (hostname == null || !InetAddressUtils.isIPv6Address(hostname)) {
-            return hostname;
-        }
-        try {
-            final InetAddress inetAddress = InetAddress.getByName(hostname);
-            return inetAddress.getHostAddress();
-        } catch (final UnknownHostException uhe) { // Should not happen, because we check for IPv6 address above
-            LOG.error("Unexpected error converting "+hostname, uhe);
-            return hostname;
-        }
-    }
-	
-	private static boolean verifyHostName(final String host, final String cn){
-		if (doWildCard(cn) && !isIPAddress(host)) {
-			return matchesWildCard(cn, host);
-		} 
-		return host.equalsIgnoreCase(cn);		
+	static boolean validCountryWildcard(final String cn) {
+		final String parts[] = cn.split("\\.");
+		if (parts.length != 3 || parts[2].length() != 2) {
+			return true; // it's not an attempt to wildcard a 2TLD within a country code
+		}
+		return Arrays.binarySearch(BAD_COUNTRY_2LDS, parts[1]) < 0;
 	}
-    private static boolean doWildCard(String cn) {
-		// Contains a wildcard
-		// wildcard in the first block
-    	// not an ipaddress (ip addres must explicitily be equal)
-    	// not using 2nd level common tld : ex: not for *.co.uk
-    	String parts[] = cn.split("\\.");
-    	return parts.length >= 3 &&
-    			parts[0].endsWith("*") &&
-    			acceptableCountryWildcard(cn) &&
-    			!isIPAddress(cn);
-    }
-    
-    
+
+	/**
+     * Check if hostname is IPv6, and if so, convert to standard format.
+	 */
+	private static String normaliseIPv6Address(final String hostname) {
+		if (hostname == null || !InetAddressUtils.isIPv6Address(hostname)) {
+			return hostname;
+		}
+		try {
+			final InetAddress inetAddress = InetAddress.getByName(hostname);
+			return inetAddress.getHostAddress();
+		} catch (final UnknownHostException uhe) { // Should not happen, because we check for IPv6 address above
+			LOG.error("Unexpected error converting " + hostname, uhe);
+			return hostname;
+		}
+	}
+
 	private static final Pattern IPV4_PATTERN = 
 			Pattern.compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
 
@@ -495,47 +478,6 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 
 	}
 
-	private static boolean acceptableCountryWildcard(final String cn) {
-		// The CN better have at least two dots if it wants wildcard action,
-		// but can't be [*.co.uk] or [*.co.jp] or [*.org.uk], etc...
-		// The [*.co.uk] problem is an interesting one. Should we just
-		// hope that CA's would never foolishly allow such a
-		// certificate to happen?
-    	
-		String[] parts = cn.split("\\.");
-		// Only checks for 3 levels, with country code of 2 letters.
-		if (parts.length > 3 || parts[parts.length - 1].length() != 2) {
-			return true;
-		}
-		String countryCode = parts[parts.length - 2];
-		return Arrays.binarySearch(BAD_COUNTRY_2LDS, countryCode) < 0;
-	}
-
-	private static boolean matchesWildCard(final String cn,
-			final String hostName) {
-		String parts[] = cn.split("\\.");
-		boolean match = false;
-		String firstpart = parts[0];
-		if (firstpart.length() > 1) {
-			// server∗
-			// e.g. server
-			String prefix =  firstpart.substring(0, firstpart.length() - 1);
-			// skipwildcard part from cn
-			String suffix = cn.substring(firstpart.length()); 
-			// skip wildcard part from host
-			String hostSuffix = hostName.substring(prefix.length());			
-			match = hostName.startsWith(prefix) && hostSuffix.endsWith(suffix);
-		} else {
-			match = hostName.endsWith(cn.substring(1));
-		}
-		if (match) {
-			// I f we're in strict mode ,
-			// [ ∗.foo.com] is not allowed to match [a.b.foo.com]
-			match = countDots(hostName) == countDots(cn);
-		}
-		return match;
-	}
-
 	private static int countDots(final String data) {
 		int dots = 0;
 		for (int i = 0; i < data.length(); i++) {
@@ -547,8 +489,8 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 	}
 
 	private static String[] getCNs(final X509Certificate cert) {
-        final LinkedList<String> cnList = new LinkedList<String>();
-        /*
+		final LinkedList<String> cnList = new LinkedList<String>();
+	    /*
           Sebastian Hauer's original StrictSSLProtocolSocketFactory used
           getName() and had the following comment:
 
@@ -571,51 +513,23 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
            I tested it with "&#x82b1;&#x5b50;.co.jp" and it worked fine.
         */
 
-        final String subjectPrincipal = cert.getSubjectX500Principal().toString();
-        final StringTokenizer st = new StringTokenizer(subjectPrincipal, ",+");
-        while(st.hasMoreTokens()) {
-            final String tok = st.nextToken().trim();
-            if (tok.length() > 3) {
-                if (tok.substring(0, 3).equalsIgnoreCase("CN=")) {
-                    cnList.add(tok.substring(3));
-                }
-            }
-        }
-        if(!cnList.isEmpty()) {
-            final String[] cns = new String[cnList.size()];
-            cnList.toArray(cns);
-            return cns;
-        } else {
-            return null;
-        }
-	}
-
-	private static String extractCN(final String subjectPrincipal) throws SSLException {
-		if (subjectPrincipal == null) {
-			return null;
-		}
-		try {
-			final LdapName subjectDN = new LdapName(subjectPrincipal);
-			final List<Rdn> rdns = subjectDN.getRdns();
-			for (int i = rdns.size() - 1; i >= 0; i--) {
-				final Rdn rds = rdns.get(i);
-				final Attributes attributes = rds.toAttributes();
-				final Attribute cn = attributes.get("cn");
-				if (cn != null) {
-					try {
-						final Object value = cn.get();
-						if (value != null) {
-							return value.toString();
-						}
-					} catch (NoSuchElementException ignore) {
-					} catch (NamingException ignore) {
-					}
+		final String subjectPrincipal = cert.getSubjectX500Principal().toString();
+		final StringTokenizer st = new StringTokenizer(subjectPrincipal, ",+");
+		while (st.hasMoreTokens()) {
+			final String tok = st.nextToken().trim();
+			if (tok.length() > 3) {
+				if (tok.substring(0, 3).equalsIgnoreCase("CN=")) {
+					cnList.add(tok.substring(3));
 				}
 			}
-		} catch (InvalidNameException e) {
-			throw new SSLException(subjectPrincipal + " is not a valid X500 distinguished name");
 		}
-		return null;
+		if (!cnList.isEmpty()) {
+			final String[] cns = new String[cnList.size()];
+			cnList.toArray(cns);
+			return cns;
+		} else {
+			return null;
+		}
 	}
 
     /**
