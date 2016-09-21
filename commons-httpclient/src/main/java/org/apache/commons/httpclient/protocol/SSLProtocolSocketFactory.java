@@ -405,7 +405,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 			// [*.org.uk], etc...
 			final String parts[] = commonName.split("\\.");
 			final boolean doWildCard = parts.length >= 3 && parts[0].endsWith("*") &&
-			                           validCountryWildcard(commonName) &&
+			                           validCountryWildcard(parts) &&
 			                           !InetAddressUtils.isValidIPAddress(host);
 
 			if (doWildCard) {
@@ -415,9 +415,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 							firstPart.substring(0, firstPart.length() - 1); // e.g. server
 					final String suffix =
 							commonName.substring(firstPart.length()); // skip wildcard part from cn
-					final String hostSuffix =
-							hostName.substring(prefix.length()); // skip wildcard part from host
-					match = hostName.startsWith(prefix) && hostSuffix.endsWith(suffix);
+					match = hostName.startsWith(prefix) && hostName.endsWith(suffix);
 				} else {
 					match = hostName.endsWith(commonName.substring(1));
 				}
@@ -439,8 +437,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 
 	}
 
-	static boolean validCountryWildcard(final String cn) {
-		final String parts[] = cn.split("\\.");
+	static boolean validCountryWildcard(final String[] parts) {
 		if (parts.length != 3 || parts[2].length() != 2) {
 			return true; // it's not an attempt to wildcard a 2TLD within a country code
 		}
