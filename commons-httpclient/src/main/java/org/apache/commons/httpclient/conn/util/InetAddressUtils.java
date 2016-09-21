@@ -117,5 +117,14 @@ public class InetAddressUtils {
         return isIPv6StdAddress(input) || isIPv6HexCompressedAddress(input);
     }
 
-}
+    /**
+     * Checks whether the input parameter is a valid IP address or not
+     *
+     * @param hostname the address string to check validity
+     * @return true if the input parameter is valid IP address, false otherwise
+     */
+    public static boolean isValidIPAddress(final String hostname) {
+        return hostname != null && (isIPv4Address(hostname) || isIPv6Address(hostname));
+    }
 
+}

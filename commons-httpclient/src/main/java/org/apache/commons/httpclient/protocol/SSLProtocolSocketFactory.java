@@ -45,7 +45,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
-import java.util.regex.Pattern;
 
 import javax.naming.InvalidNameException;
 import javax.naming.NamingException;
@@ -92,6 +91,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 
 	static {
 		Arrays.sort(LOCALHOSTS);
+		Arrays.sort(BAD_COUNTRY_2LDS);
 	}
 
 	/**
@@ -405,7 +405,8 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 			// [*.org.uk], etc...
 			final String parts[] = commonName.split("\\.");
 			final boolean doWildCard = parts.length >= 3 && parts[0].endsWith("*") &&
-			                           validCountryWildcard(commonName) && !isIPAddress(host);
+			                           validCountryWildcard(commonName) &&
+			                           !InetAddressUtils.isValidIPAddress(host);
 
 			if (doWildCard) {
 				final String firstPart = parts[0];
@@ -460,26 +461,6 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 			LOG.error("Unexpected error converting " + hostname, uhe);
 			return hostname;
 		}
-	}
-
-	private static final Pattern IPV4_PATTERN = 
-			Pattern.compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
-
-	private static final Pattern IPV6_STD_PATTERN = 
-			Pattern.compile("^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$");
-
-	private static final Pattern IPV6_HEX_COMPRESSED_PATTERN = 
-			Pattern.compile("^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$");
-
-
-	private static boolean isIPAddress(final String hostname) {
-		return hostname != null
-				&& (
-						IPV4_PATTERN.matcher(hostname).matches()
-						|| IPV6_STD_PATTERN.matcher(hostname).matches() 
-						|| IPV6_HEX_COMPRESSED_PATTERN.matcher(hostname).matches()
-		);
-
 	}
 
 	private static int countDots(final String data) {
