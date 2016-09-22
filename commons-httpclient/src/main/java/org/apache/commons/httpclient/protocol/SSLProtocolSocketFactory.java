@@ -507,19 +507,18 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 		return null;
 	}
 
+	/**
+	 * All instances of SSLProtocolSocketFactory are the same.
+	 */
+	public boolean equals(Object obj) {
+		return ((obj != null) && obj.getClass().equals(getClass()));
+	}
 
 	/**
-     * All instances of SSLProtocolSocketFactory are the same.
-     */
-    public boolean equals(Object obj) {
-        return ((obj != null) && obj.getClass().equals(getClass()));
-    }
+	 * All instances of SSLProtocolSocketFactory have the same hash code.
+	 */
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 
-    /**
-     * All instances of SSLProtocolSocketFactory have the same hash code.
-     */
-    public int hashCode() {
-        return getClass().hashCode();
-    }    
-    
 }
