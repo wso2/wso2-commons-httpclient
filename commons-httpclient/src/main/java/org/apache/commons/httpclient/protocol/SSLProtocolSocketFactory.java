@@ -58,9 +58,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
-import org.apache.commons.httpclient.HttpConstants;
 import org.apache.commons.httpclient.conn.util.InetAddressUtils;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.util.EncodingUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -107,7 +107,7 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
      */
     public SSLProtocolSocketFactory() {
         super();
-        String hostNameVerifier = System.getProperty(HttpConstants.HOST_NAME_VERIFIER);
+        String hostNameVerifier = System.getProperty(EncodingUtil.HOST_NAME_VERIFIER);
         if (hostNameVerifier != null) {
             this.hostNameVerifier = hostNameVerifier;
         }
@@ -291,11 +291,11 @@ public class SSLProtocolSocketFactory implements SecureProtocolSocketFactory {
 
 		String cn = getCN(cert);
 		String[] subjectAlts = getDNSSubjectAlts(cert);
-		if (HttpConstants.STRICT.equals(hostNameVerifier)) {
+		if (EncodingUtil.STRICT.equals(hostNameVerifier)) {
 			verifyHostName(host, cn, subjectAlts, true);
-		} else if (HttpConstants.ALLOW_ALL.equals(hostNameVerifier)) {
+		} else if (EncodingUtil.ALLOW_ALL.equals(hostNameVerifier)) {
 			return;
-		} else if (HttpConstants.DEFAULT_AND_LOCALHOST.equals(hostNameVerifier)) {
+		} else if (EncodingUtil.DEFAULT_AND_LOCALHOST.equals(hostNameVerifier)) {
 			if (isLocalhost(host)) {
 				return;
 			}

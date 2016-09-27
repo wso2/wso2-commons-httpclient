@@ -50,6 +50,14 @@ public class EncodingUtil {
     /** Default content encoding chatset */
     private static final String DEFAULT_CHARSET = "ISO-8859-1";
 
+    public static final String STRICT = "Strict";
+
+    public static final String ALLOW_ALL = "AllowAll";
+
+    public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
+
+    public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
+
     /** Log object for this class. */
     private static final Log LOG = LogFactory.getLog(EncodingUtil.class);
 
