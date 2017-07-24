@@ -22,7 +22,7 @@
 
     <groupId>org.wso2.commons-httpclient</groupId>
     <artifactId>commons-httpclient-parent</artifactId>
-    <version>3.1.0-wso2v4-SNAPSHOT</version>
+    <version>3.1.0-wso2v4</version>
     <name>Commons HTTP Client - WSO2 Parent</name>
     <packaging>pom</packaging>
 
@@ -41,7 +41,7 @@
         <connection>scm:git:https://github.com/wso2/wso2-commons-httpclient.git</connection>
         <developerConnection>scm:git:https://github.com/wso2/wso2-commons-httpclient.git</developerConnection>
         <url>https://github.com/wso2/wso2-commons-httpclient.git/</url>
-        <tag>HEAD</tag>
+        <tag>v3.1.0-wso2v4</tag>
     </scm>
 
 
