@@ -37,7 +37,7 @@ import java.io.InputStream;
 /**
  * Logs all data read to the wire LOG.
  *
- * @author Ortwin Gl�ck
+ * @author Ortwin Glueck
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
  * 

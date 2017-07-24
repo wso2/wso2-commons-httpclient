@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Establishes a tunneled HTTP connection via the CONNECT method.
  *
- * @author Ortwin Gl???ck
+ * @author Ortwin Glueck
  * @author dIon Gillard
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>

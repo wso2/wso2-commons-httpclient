@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  * @author Rodney Waldhoff
  * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
- * @author Ortwin Gl???ck
+ * @author Ortwin Glueck
  * @author Sean C. Sullivan
  * @author <a href="mailto:adrian@ephox.com">Adrian Sutton</a>
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
