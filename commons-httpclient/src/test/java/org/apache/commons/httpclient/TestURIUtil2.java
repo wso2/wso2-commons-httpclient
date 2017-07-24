@@ -52,7 +52,7 @@ public class TestURIUtil2 extends TestCase {
     }
 
     public void testEncodeWithinQuery() {
-        String unescaped1=  "abc123+ %_?=&#.�";
+        String unescaped1=  "abc123+ %_?=&#.ä";
         try {
             String stringRet = URIUtil.encodeWithinQuery(unescaped1);
             assertEquals("abc123%2B%20%25_%3F%3D%26%23.%C3%A4", stringRet);
