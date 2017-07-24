@@ -62,7 +62,7 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  * @author <a href="mailto:dsale@us.britannica.com">Doug Sale</a>
  * @author <a href="mailto:jsdever@apache.org">Jeff Dever</a>
- * @author Ortwin Gl???ck
+ * @author Ortwin Glueck
  * @author <a href="mailto:mbowler@GargoyleSoftware.com">Mike Bowler</a>
  * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
  *
