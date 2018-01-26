@@ -150,6 +150,7 @@ class HttpMethodDirector {
         
                 // get a connection, if we need one
                 if (this.conn == null) {
+                    connectionManager.closeIdleConnections(60000);
                     this.conn = connectionManager.getConnectionWithTimeout(
                         hostConfiguration,
                         this.params.getConnectionManagerTimeout() 
