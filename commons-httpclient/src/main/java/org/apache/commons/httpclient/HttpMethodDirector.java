@@ -153,7 +153,7 @@ class HttpMethodDirector {
                     connectionManager.closeIdleConnections(60000);
                     this.conn = connectionManager.getConnectionWithTimeout(
                         hostConfiguration,
-                        this.params.getConnectionManagerTimeout() 
+                        this.connectionManager.getParams().getConnectionTimeout()
                     );
                     this.conn.setLocked(true);
                     if (this.params.isAuthenticationPreemptive()
