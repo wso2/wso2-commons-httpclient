@@ -73,8 +73,6 @@ class HttpMethodDirector {
 
     /** The proxy authenticate response header. */
     public static final String PROXY_AUTH_RESP = "Proxy-Authorization";
-    
-    private static final int DEFAULT_IDLE_TIMEOUT = 120000;
 
     private static final Log LOG = LogFactory.getLog(HttpMethodDirector.class);
 
@@ -152,14 +150,9 @@ class HttpMethodDirector {
         
                 // get a connection, if we need one
                 if (this.conn == null) {
-                    if (connectionManager.getParams().getSoTimeout() > 0) {
-                        connectionManager.closeIdleConnections(connectionManager.getParams().getSoTimeout());
-                    } else {
-                        connectionManager.closeIdleConnections(DEFAULT_IDLE_TIMEOUT);
-                    }
                     this.conn = connectionManager.getConnectionWithTimeout(
                         hostConfiguration,
-                        this.connectionManager.getParams().getConnectionTimeout()
+                        this.params.getConnectionManagerTimeout() 
                     );
                     this.conn.setLocked(true);
                     if (this.params.isAuthenticationPreemptive()
