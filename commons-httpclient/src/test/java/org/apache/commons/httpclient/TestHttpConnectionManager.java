@@ -257,6 +257,7 @@ public class TestHttpConnectionManager extends HttpClientTestBase {
         this.server.setHttpService(new EchoService());
 
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        connectionManager.getParams().setConnectionTimeout(1);
         connectionManager.getParams().setDefaultMaxConnectionsPerHost(1);
 
         client.setHttpConnectionManager(connectionManager);
@@ -308,6 +309,7 @@ public class TestHttpConnectionManager extends HttpClientTestBase {
         this.server.setHttpService(new EchoService());
 
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        connectionManager.getParams().setConnectionTimeout(1);
         connectionManager.getParams().setDefaultMaxConnectionsPerHost(1);
 
         client.setHttpConnectionManager(connectionManager);
@@ -605,6 +607,7 @@ public class TestHttpConnectionManager extends HttpClientTestBase {
         this.server.setHttpService(new EchoService());
 
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        connectionManager.getParams().setConnectionTimeout(1);
         connectionManager.getParams().setDefaultMaxConnectionsPerHost(1);
 
         client.setHttpConnectionManager(connectionManager);
@@ -713,6 +716,7 @@ public class TestHttpConnectionManager extends HttpClientTestBase {
         this.server.setHttpService(new EchoService());
 
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        connectionManager.getParams().setConnectionTimeout(30000);
         connectionManager.getParams().setIntParameter(
             HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS, 1);
 
