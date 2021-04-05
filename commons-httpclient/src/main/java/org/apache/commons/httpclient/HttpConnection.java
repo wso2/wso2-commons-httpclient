@@ -704,8 +704,9 @@ public class HttpConnection {
                 } else {
                     socketFactory = this.protocolInUse.getSocketFactory();
                 }
+                int index = host.indexOf(":");
                 this.socket = socketFactory.createSocket(
-                            host, port, 
+                            index != -1 ? host.substring(0, index) : host, port,
                             localAddress, 0,
                             this.params);
             }

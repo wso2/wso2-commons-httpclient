@@ -1353,7 +1353,7 @@ public abstract class HttpMethodBase implements HttpMethod {
         }
 
         //appends the port only if not using the default port for the protocol
-        if (conn.getProtocol().getDefaultPort() != port) {
+        if (host.indexOf(":") == -1 && conn.getProtocol().getDefaultPort() != port) {
             host += (":" + port);
         }
 
