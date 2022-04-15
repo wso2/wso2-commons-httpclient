@@ -64,6 +64,7 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.artifactId}</Bundle-Name>
                         <Export-Package>
+                            org.apache.commons.ssl.*; version="3.1.0",
                             org.apache.commons.httpclient.*; version="3.1.0",
                         </Export-Package>
                         <Import-Package>
