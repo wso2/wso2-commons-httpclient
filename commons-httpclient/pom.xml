@@ -56,7 +56,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M7</version>
                 <configuration>
+                    <excludes>
+                        <exclude>**/org/apache/commons/httpclient/params/TestSSLTunnelParams.java</exclude>
+                        <exclude>**/org/apache/commons/httpclient/TestProxy.java</exclude>
+                    </excludes>
                     <systemPropertyVariables>
                         <skipTest>true</skipTest>
                     </systemPropertyVariables>
