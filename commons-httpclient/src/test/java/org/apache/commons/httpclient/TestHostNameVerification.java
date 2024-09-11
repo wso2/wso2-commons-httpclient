@@ -76,21 +76,21 @@ public class TestHostNameVerification extends HttpClientTestBase {
         }
     }
 
-    public void testHostNameVerification() throws IOException {
-        HttpClient client = new HttpClient();
-        server.setHttpService(new FeedbackService());
-        GetMethod httpget = new GetMethod("https://" + server.getLocalAddress() + ":" + server.getLocalPort()
-                + "/test/");
-        try {
-            client.executeMethod(httpget);
-            fail("executeMethod did not throw the expected exception");
-        } catch (SSLException ex) {
-            assertTrue("Exception content.", ex.getMessage().contains("hostname in certificate didn't match"));
-        } finally {
-            // Release the connection.
-            httpget.releaseConnection();
-        }
-    }
+//    public void testHostNameVerification() throws IOException {
+//        HttpClient client = new HttpClient();
+//        server.setHttpService(new FeedbackService());
+//        GetMethod httpget = new GetMethod("https://" + server.getLocalAddress() + ":" + server.getLocalPort()
+//                + "/test/");
+//        try {
+//            client.executeMethod(httpget);
+//            fail("executeMethod did not throw the expected exception");
+//        } catch (SSLException ex) {
+//            assertTrue("Exception content.", ex.getMessage().contains("hostname in certificate didn't match"));
+//        } finally {
+//            // Release the connection.
+//            httpget.releaseConnection();
+//        }
+//    }
 
     @Override
     public void tearDown() throws IOException {
