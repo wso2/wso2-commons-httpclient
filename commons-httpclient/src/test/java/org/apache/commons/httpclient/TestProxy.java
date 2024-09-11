@@ -52,7 +52,6 @@ import org.apache.commons.httpclient.server.HttpServiceHandler;
  * @author Ortwin Glueck
  * @author Oleg Kalnichevski
  */
-@DisabledIfSystemProperty(named = "skipTest", matches = "true")
 public class TestProxy extends HttpClientTestBase {
 
     public TestProxy(String testName) throws IOException {
