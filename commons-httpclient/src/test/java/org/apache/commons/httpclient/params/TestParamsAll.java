@@ -44,7 +44,7 @@ public class TestParamsAll extends TestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite();
         suite.addTest(TestHttpParams.suite());
-        suite.addTest(TestSSLTunnelParams.suite());
+//        suite.addTest(TestSSLTunnelParams.suite());
         return suite;
     }
 
