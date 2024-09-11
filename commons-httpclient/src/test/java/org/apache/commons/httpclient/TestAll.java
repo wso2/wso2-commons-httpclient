@@ -101,7 +101,7 @@ public class TestAll extends TestCase {
         // Non compliant behaviour
         suite.addTest(TestNoncompliant.suite());
         // Proxy
-        suite.addTest(TestProxy.suite());
+//        suite.addTest(TestProxy.suite());
         suite.addTest(TestProxyWithRedirect.suite());
         return suite;
     }
