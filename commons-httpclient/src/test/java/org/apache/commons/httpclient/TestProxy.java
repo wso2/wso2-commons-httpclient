@@ -26,7 +26,7 @@
  * <http://www.apache.org/>.
  *
  */
-// TODO: Enable these tests ones build failures are fixed
+// TODO: Enable these tests once the build failures are fixed
 //package org.apache.commons.httpclient;
 //
 //import java.io.IOException;

@@ -59,9 +59,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/org/apache/commons/httpclient/params/TestSSLTunnelParams.java</exclude>
-                    </excludes>
                     <argLine>${argLine}</argLine>
                 </configuration>
             </plugin>
