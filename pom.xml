@@ -146,8 +146,8 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.2</version>
                     <configuration>
-                        <argLine>${argLine}</argLine>
-                        <forkCount>0</forkCount>
+                        <!-- to increase memory for tests on travis ci -->
+                        <argLine>@{argline} -Xmx64m</argLine>
                     </configuration>
                 </plugin>
             </plugins>
