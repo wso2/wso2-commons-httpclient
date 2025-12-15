@@ -98,6 +98,21 @@ public class StringPart extends PartBase {
      *
      * @param name The name of the part
      * @param value the string to post
+     * @param disableSendingMultipartPartCharset whether to send the charset value in the Content-Type header
+     * @param charset the charset to be used to encode the string, if <code>null</code>
+     * the {@link #DEFAULT_CHARSET default} is used
+     */
+    public StringPart(String name, String value, boolean disableSendingMultipartPartCharset, String charset) {
+        this(name, value, charset);
+        super.disableSendingMultipartPartCharset = disableSendingMultipartPartCharset;
+    }
+
+
+    /**
+     * Constructor.
+     *
+     * @param name The name of the part
+     * @param value the string to post
      */
     public StringPart(String name, String value) {
         this(name, value, null);

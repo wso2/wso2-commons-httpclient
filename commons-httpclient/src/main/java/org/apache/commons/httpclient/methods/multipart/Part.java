@@ -106,6 +106,9 @@ public abstract class Part {
     protected static final byte[] CONTENT_TYPE_BYTES = 
       EncodingUtil.getAsciiBytes(CONTENT_TYPE);
 
+    /** Flag indicating whether to send the charset in the Content-Type header */
+    protected boolean disableSendingMultipartPartCharset = false;
+
     /** Content charset */
     protected static final String CHARSET = "; charset=";
 
@@ -234,7 +237,7 @@ public abstract class Part {
             out.write(CONTENT_TYPE_BYTES);
             out.write(EncodingUtil.getAsciiBytes(contentType));
             String charSet = getCharSet();
-            if (charSet != null) {
+            if (charSet != null && !disableSendingMultipartPartCharset) {
                 out.write(CHARSET_BYTES);
                 out.write(EncodingUtil.getAsciiBytes(charSet));
             }
