@@ -109,6 +109,9 @@ public abstract class Part {
     /** Flag indicating whether to send the charset in the Content-Type header */
     protected boolean disableSendingMultipartPartCharset = false;
 
+    /** Flag indicating whether to preserve the Content-Transfer-Encoding header */
+    protected boolean preserveMultipartPartContentTransferEncoding = false;
+
     /** Content charset */
     protected static final String CHARSET = "; charset=";
 
@@ -254,7 +257,7 @@ public abstract class Part {
      protected void sendTransferEncodingHeader(OutputStream out) throws IOException {
         LOG.trace("enter sendTransferEncodingHeader(OutputStream out)");
         String transferEncoding = getTransferEncoding();
-        if (transferEncoding != null) {
+        if (transferEncoding != null && !preserveMultipartPartContentTransferEncoding) {
             out.write(CRLF_BYTES);
             out.write(CONTENT_TRANSFER_ENCODING_BYTES);
             out.write(EncodingUtil.getAsciiBytes(transferEncoding));

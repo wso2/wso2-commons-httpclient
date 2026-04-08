@@ -119,7 +119,26 @@ public class FilePart extends PartBase {
         this(name, partSource, contentType, charset);
         super.disableSendingMultipartPartCharset = disableSendingMultipartPartCharset;
     }
-        
+
+    /**
+     * FilePart Constructor.
+     *
+     * @param name                                         the name for this part
+     * @param partSource                                   the source for this part
+     * @param contentType                                  the content type for this part, if <code>null</code> the
+     *                                                     {@link #DEFAULT_CONTENT_TYPE default} is used
+     * @param disableSendingMultipartPartCharset           whether to send the charset in the Content-Type header
+     * @param preserveMultipartPartContentTransferEncoding whether to preserve the Content-Transfer-Encoding header
+     * @param charset                                      the charset encoding for this part, if <code>null</code> the
+     *                                                     {@link #DEFAULT_CHARSET default} is used
+     */
+    public FilePart(String name, PartSource partSource, String contentType, boolean disableSendingMultipartPartCharset,
+                    boolean preserveMultipartPartContentTransferEncoding, String charset) {
+        this(name, partSource, contentType, charset);
+        super.disableSendingMultipartPartCharset = disableSendingMultipartPartCharset;
+        super.preserveMultipartPartContentTransferEncoding = preserveMultipartPartContentTransferEncoding;
+    }
+
     /**
      * FilePart Constructor.
      *
