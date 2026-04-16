@@ -232,7 +232,7 @@ public abstract class Part {
      * @param out The output stream
      * @throws IOException If an IO problem occurs.
      */
-     protected void sendContentTypeHeader(OutputStream out) throws IOException {
+    protected void sendContentTypeHeader(OutputStream out) throws IOException {
         LOG.trace("enter sendContentTypeHeader(OutputStream out)");
         String contentType = getContentType();
         if (contentType != null) {
@@ -254,10 +254,10 @@ public abstract class Part {
      * @param out The output stream
      * @throws IOException If an IO problem occurs.
      */
-     protected void sendTransferEncodingHeader(OutputStream out) throws IOException {
+    protected void sendTransferEncodingHeader(OutputStream out) throws IOException {
         LOG.trace("enter sendTransferEncodingHeader(OutputStream out)");
         String transferEncoding = getTransferEncoding();
-        if (transferEncoding != null && !preserveMultipartPartContentTransferEncoding) {
+        if (transferEncoding != null) {
             out.write(CRLF_BYTES);
             out.write(CONTENT_TRANSFER_ENCODING_BYTES);
             out.write(EncodingUtil.getAsciiBytes(transferEncoding));
