@@ -152,7 +152,9 @@ class HttpMethodDirector {
         
                 // get a connection, if we need one
                 if (this.conn == null) {
-                    if (connectionManager.getParams().getSoTimeout() > 0) {
+                    if (connectionManager.getParams().getConnectionIdleTimeout() > 0) {
+                        connectionManager.closeIdleConnections(connectionManager.getParams().getConnectionIdleTimeout());
+                    } else if (connectionManager.getParams().getSoTimeout() > 0) {
                         connectionManager.closeIdleConnections(connectionManager.getParams().getSoTimeout());
                     } else {
                         connectionManager.closeIdleConnections(DEFAULT_IDLE_TIMEOUT);
