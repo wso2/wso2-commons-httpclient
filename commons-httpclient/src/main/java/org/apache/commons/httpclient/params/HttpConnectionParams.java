@@ -55,7 +55,12 @@ public class HttpConnectionParams extends DefaultHttpParams {
      * </p>
      * @see java.net.SocketOptions#SO_TIMEOUT
      */
-    public static final String SO_TIMEOUT = "http.socket.timeout"; 
+    public static final String SO_TIMEOUT = "http.socket.timeout";
+
+    /**
+     * Defines the connection idle timeout
+     */
+    public static final String CONNECTION_IDLE_TIMEOUT = "http.connection.idle-timeout";
 
     /**
      * Determines whether Nagle's algorithm is to be used. The Nagle's algorithm 
@@ -160,6 +165,14 @@ public class HttpConnectionParams extends DefaultHttpParams {
      */
     public void setSoTimeout(int timeout) {
         setIntParameter(SO_TIMEOUT, timeout);
+    }
+
+    public int getConnectionIdleTimeout() {
+        return getIntParameter(CONNECTION_IDLE_TIMEOUT, 0);
+    }
+
+    public void setConnectionIdleTimeout(int timeout) {
+        setIntParameter(CONNECTION_IDLE_TIMEOUT, timeout);
     }
 
     /**
