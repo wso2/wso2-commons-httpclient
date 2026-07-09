@@ -44,12 +44,6 @@
             <version>3.1.0-wso2v10-SNAPSHOT</version>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons.ssl</groupId>
-            <artifactId>not-yet-commons-ssl</artifactId>
-            <version>0.3.9</version>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <build>
@@ -64,7 +58,6 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${pom.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.apache.commons.ssl.*; version="3.1.0",
                             org.apache.commons.httpclient.*; version="3.1.0",
                         </Export-Package>
                         <Import-Package>
