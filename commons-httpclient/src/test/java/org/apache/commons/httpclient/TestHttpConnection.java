@@ -182,6 +182,66 @@ public class TestHttpConnection extends HttpClientTestBase {
 
     }
     
+    public void testOpenKeepsHostname() throws Exception {
+        assertEquals("api.example.com", getSocketHost("api.example.com"));
+    }
+
+    public void testOpenKeepsIPv4Address() throws Exception {
+        assertEquals("192.168.1.10", getSocketHost("192.168.1.10"));
+    }
+
+    public void testOpenKeepsIPv6Address() throws Exception {
+        assertEquals("[2001:db8:123:123f:1c05:123a:7:5038]",
+                getSocketHost("[2001:db8:123:123f:1c05:123a:7:5038]"));
+    }
+
+    public void testOpenKeepsIPv6LoopbackAddress() throws Exception {
+        assertEquals("[0:0:0:0:0:0:0:1]", getSocketHost("[0:0:0:0:0:0:0:1]"));
+    }
+
+    public void testOpenKeepsIPv4MappedIPv6Address() throws Exception {
+        assertEquals("[::ffff:192.0.2.128]", getSocketHost("[::ffff:192.0.2.128]"));
+    }
+
+    public void testOpenKeepsIPv6LinkLocalAddressWithZoneId() throws Exception {
+        assertEquals("[fe80::1%eth0]", getSocketHost("[fe80::1%eth0]"));
+    }
+
+    public void testOpenStripsPortFromHostname() throws Exception {
+        assertEquals("api.example.com", getSocketHost("api.example.com:8080"));
+    }
+
+    public void testOpenStripsPortFromIPv4Address() throws Exception {
+        assertEquals("192.168.1.10", getSocketHost("192.168.1.10:8080"));
+    }
+
+    public void testOpenStripsPortFromIPv6Address() throws Exception {
+        assertEquals("[2001:db8:123:123f:1c05:123a:7:5038]",
+                getSocketHost("[2001:db8:123:123f:1c05:123a:7:5038]:8080"));
+        assertEquals("[0:0:0:0:0:0:0:1]", getSocketHost("[0:0:0:0:0:0:0:1]:8080"));
+        assertEquals("[::1]", getSocketHost("[::1]:8080"));
+    }
+
+    /**
+     * Opens a connection to the given host (which may carry a port) and returns the host
+     * that HttpConnection.open() passes to the socket factory.
+     */
+    private String getSocketHost(String host) throws Exception {
+        HostRecordingSocketFactory socketFactory = new HostRecordingSocketFactory();
+        Protocol protocol = new Protocol("http", socketFactory, 80);
+        HttpConnection conn = new HttpConnection(host, 8080, protocol);
+        try {
+            conn.open();
+            fail("HostRecordingSocketFactory should have aborted the connection");
+        } catch (HostRecordingSocketFactory.SocketNotCreatedException expected) {
+            // the socket factory records the host and aborts without connecting
+        } finally {
+            conn.close();
+        }
+        assertEquals(8080, socketFactory.port);
+        return socketFactory.host;
+    }
+
     /**
      * A ProtocolSocketFactory that delays before creating a socket.
      */
@@ -245,6 +305,35 @@ public class TestHttpConnection extends HttpClientTestBase {
             return realFactory.createSocket(host, port);
         }
 
+    }
+
+    /**
+     * A ProtocolSocketFactory that records the host and port it is asked to connect to,
+     * then aborts instead of creating a socket.
+     */
+    static class HostRecordingSocketFactory implements ProtocolSocketFactory {
+
+        static class SocketNotCreatedException extends IOException {
+        }
+
+        private String host;
+        private int port;
+
+        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort)
+                throws IOException {
+            return createSocket(host, port);
+        }
+
+        public Socket createSocket(String host, int port, InetAddress localAddress, int localPort,
+                HttpConnectionParams params) throws IOException {
+            return createSocket(host, port);
+        }
+
+        public Socket createSocket(String host, int port) throws IOException {
+            this.host = host;
+            this.port = port;
+            throw new SocketNotCreatedException();
+        }
     }
 
 }
