@@ -704,7 +704,15 @@ public class HttpConnection {
                 } else {
                     socketFactory = this.protocolInUse.getSocketFactory();
                 }
-                int index = host.indexOf(":");
+                int index;
+                if (host.startsWith("[")) {
+                    // IPv6 literal, which may also carry a port (e.g. "[::1]" or "[::1]:8080"):
+                    // keep the brackets, drop anything after the closing one.
+                    int closingBracketIndex = host.indexOf(']');
+                    index = closingBracketIndex != -1 ? closingBracketIndex + 1 : -1;
+                } else {
+                    index = host.indexOf(":");
+                }
                 this.socket = socketFactory.createSocket(
                             index != -1 ? host.substring(0, index) : host, port,
                             localAddress, 0,
